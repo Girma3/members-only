@@ -9,7 +9,8 @@ async function hashPassword(password) {
     const hashedPassword = await bcrypt.hash(password, 10);
     return hashedPassword;
   } catch (err) {
-    console.log(err, "err while hashing password");
+    console.error("Error while hashing password:", err);
+    throw err;
   }
 }
 
@@ -21,26 +22,38 @@ async function main() {
   try {
     await client.connect();
 
-    const demoPassword = await hashPassword("1234");
+    const demoPassword = await hashPassword("12");
 
-    const SQL = `
-    CREATE TABLE IF NOT EXISTS users (
+    const createUserTableSQL = `
+      CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        password TEXT NOT NULL
-    );
+        password TEXT NOT NULL,
+        member BOOLEAN NOT NULL DEFAULT FALSE,
+        admin BOOLEAN NOT NULL DEFAULT FALSE
+      );
+    `;
 
-    INSERT INTO users (name, password) VALUES ('KING', '${demoPassword}');
+    const insertUserSQL = `
+      INSERT INTO users (name, password) VALUES ($1, $2);
+    `;
 
-    CREATE TABLE IF NOT EXISTS messages (
+    const createMessagesTableSQL = `
+      CREATE TABLE IF NOT EXISTS messages (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
         text TEXT NOT NULL,
         timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
+      );
+    `;
+    const insertMsgSql = `
+      INSERT INTO messages (text,user_id) VALUES ($1,$2);
     `;
 
-    await client.query(SQL);
+    await client.query(createUserTableSQL);
+    await client.query(insertUserSQL, ["king", demoPassword]);
+    await client.query(createMessagesTableSQL);
+    await client.query(insertMsgSql, ["Happy coding EveryOne 💪.", 1]);
   } catch (err) {
     console.error("Error while populating db:", err);
   } finally {
