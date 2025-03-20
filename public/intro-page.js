@@ -17,6 +17,103 @@ const logInShowPassword = document.querySelector(
   "[data-name='log-in-checkbox']"
 );
 const logInPassword = document.querySelector("[data-name='log-in-password']");
+// sign in input and label
+const inputHolders = document.querySelectorAll(".input-holder");
+// err msg spans sign in
+const errSignInSpans = signInForm.querySelectorAll(".err-msg");
+// err msg log in
+const logInFormInputs = logInForm.querySelectorAll("input");
+const errLogInSpans = logInForm.querySelectorAll(".err-msg");
+
+let errMsgs = [
+  {
+    type: "field",
+    value: "",
+    msg: "name can't be empty!",
+    path: "userName",
+    location: "body",
+  },
+  {
+    type: "field",
+    value: "",
+    msg: "name should be at least 3 and more characters",
+    path: "userName",
+    location: "body",
+  },
+];
+let logErr = [
+  {
+    type: "field",
+    value: "",
+    msg: "name can't be empty!",
+    path: "logInUserName",
+    location: "body",
+  },
+  {
+    type: "field",
+    value: "",
+    msg: "name should be at least 3 and more characters",
+    path: "logInUserName",
+    location: "body",
+  },
+  {
+    type: "field",
+    value: "",
+    msg: "password can't be empty",
+    path: "logInUserPassword",
+    location: "body",
+  },
+  {
+    type: "field",
+    value: "",
+    msg: "password must be at least 3  characters",
+    path: "logInUserPassword",
+    location: "body",
+  },
+];
+//hide on input event for  login err msg
+
+//function that accept spans and msg as an array from backend to show error msg
+function showFormErrMsg(spanArray, msgArray) {
+  if (!spanArray.length || !msgArray.length) return;
+  spanArray.forEach((span, index) => {
+    if (msgArray[index] && span.dataset.field == msgArray[index].path) {
+      span.textContent = msgArray[index].msg;
+    }
+  });
+}
+//showFormErrMsg(errSignInSpans, errMsgs);
+//function to hide err msg when input on focus (used later)
+function hideErrMsg(errSpans, input) {
+  errSpans.forEach((span) => {
+    if (span.dataset.field == input.name) {
+      span.style.display = "none";
+    }
+  });
+}
+
+inputHolders.forEach((holder, index) => {
+  const input = holder.querySelector("input");
+  const label = holder.querySelector("label");
+
+  input.addEventListener("focus", () => {
+    label.style.top = "-12px";
+  });
+  input.addEventListener("input", () => {
+    hideErrMsg(errSignInSpans, input);
+  });
+
+  input.addEventListener("blur", () => {
+    if (!input.value) {
+      label.style.top = "initial";
+    }
+  });
+});
+function clearErrMsg(eleArray) {
+  eleArray.forEach((span) => {
+    span.textContent = "";
+  });
+}
 
 function togglePasswordVisibility(passwordInput) {
   if (passwordInput.type === "password") {
@@ -70,14 +167,15 @@ if (signInForm) {
         body: formJson,
       });
       const result = await response.json();
-      console.log(result, "hey home");
 
       if (response.status === 200) {
-        joinClubBtn.style.display = "block";
+        signInForm.reset();
+        clearErrMsg(errSignInSpans);
+        signInModal.close();
         window.location.href = result.redirect;
       } else if (response.status === 401) {
-        console.log(result);
-        //show errors
+        //show form errors  msgs
+        showFormErrMsg(errSignInSpans, result.errors.errors);
       }
     } catch (err) {
       console.log(err, "err while sign in.");
@@ -101,24 +199,28 @@ if (logInForm) {
       const result = await response.json();
 
       if (response.status === 200) {
-        // window.location.href = "/";
-        //close modal and show join in club button,log out btn and hide sign in and log in btn
+        //reset form
+        logInForm.reset();
+        clearErrMsg(errLogInSpans);
         logInModal.close();
-        //joinClubBtn.style.display = "block";
-        // signInBtn.style.display = "none";
+
         window.location.href = result.redirect;
       } else if (response.status === 401) {
-        //show errors
-        if (result.message) {
-          //show authentication error if there
-        }
-        console.log(result);
+        console.log(result.errors);
+        //show errors and add event to hide on input
+        showFormErrMsg(errLogInSpans, result.errors);
+        logInFormInputs.forEach((input) => {
+          input.addEventListener("input", () => {
+            hideErrMsg(errLogInSpans, input);
+          });
+        });
       }
     } catch (err) {
       console.log(err, "err while trying to log in msg.");
     }
   });
 }
+
 // start update msg time stamp on page load
 document.addEventListener("DOMContentLoaded", startRealTimeUpdate);
-export default togglePasswordVisibility;
+export { showFormErrMsg, hideErrMsg, clearErrMsg };

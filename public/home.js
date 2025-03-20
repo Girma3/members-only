@@ -1,4 +1,5 @@
 import startRealTimeUpdate from "./updateMsgTime.js";
+//import { showFormErrMsg, hideErrMsg, clearErrMsg } from "./intro-page.js";
 const createMsgModal = document.querySelector("[data-name='create-msg-modal']");
 const msgForm = document.querySelector("[data-name='create-msg-form']");
 const msgBtn = document.querySelector(".msg-btn");
@@ -7,6 +8,10 @@ const msgBtn = document.querySelector(".msg-btn");
 const joinClubModal = document.querySelector("[data-name='join-club-modal']");
 const joinClubForm = document.querySelector("[data-name='join-club-form']");
 const joinClubBtn = document.querySelector("[data-name='join-club-btn']");
+// err spans join form
+const errSpans = joinClubForm.querySelectorAll(".err-msg");
+//input
+const passcodeInput = joinClubForm.querySelector("input");
 
 const createMsgFormHolder = document.querySelector(
   "[data-name='create-msg-form']"
@@ -63,14 +68,23 @@ if (joinClubForm) {
       console.log(result);
 
       if (response.status === 200) {
+        joinClubForm.reset();
         // createMsgBtn.style.display = "block";
         // window.location.href = result.redirect;
-        // joinClubModal.close();
+        joinClubModal.close();
         ///reveal the message author and show admin login btn
         window.location.href = result.redirect;
       } else if (response.status === 401) {
         //show errors
-        console.log(result);
+        const errArray = result.errors;
+        errArray.forEach((err, index) => {
+          if (errArray[index].path == errSpans[index].dataset.field) {
+            errSpans[index].textContent = err.msg;
+          }
+        });
+        passcodeInput.addEventListener("input", () => {
+          errSpans.forEach((span) => (span.textContent = ""));
+        });
       }
     } catch (err) {
       console.log(err, "err while join club msg.");

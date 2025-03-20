@@ -6,6 +6,9 @@ const adminModal = document.querySelector("[data-name='admin-modal']");
 const adminForm = document.querySelector("[data-name='admin-form']");
 const adminBtn = document.querySelector("[data-name='admin-btn']");
 
+const passCodeInput = adminForm.querySelector("input")
+const errSpans = adminForm.querySelectorAll(".err-msg")
+
 adminBtn.addEventListener("click", () => {
   adminModal.showModal();
 });
@@ -61,6 +64,15 @@ if (adminForm) {
         window.location.href = result.redirect;
       } else if (response.status === 401) {
         //show errors
+        const errArray = result.errors;
+        errArray.forEach((err, index) => {
+          if (errArray[index].path == errSpans[index].dataset.field) {
+            errSpans[index].textContent = err.msg;
+          }
+        });
+        passCodeInput.addEventListener("input", () => {
+          errSpans.forEach((span) => (span.textContent = ""));
+        });
         console.log(result);
       }
     } catch (err) {
