@@ -54,9 +54,8 @@ const validateJoinClub = [
     .withMessage("pass code mut beat least 2 characters.") //adjust it
     .custom((value) => {
       if (value !== "xy") {
-        throw new error("Invalid passcode read the clue and try again");
+        throw new Error("Invalid passcode read the clue and try again");
       }
-      return true;
     }),
 ];
 
@@ -69,30 +68,33 @@ const validateAdmin = [
     .withMessage("pass code mut beat least 2 characters.") //adjust it
     .custom((value) => {
       if (value !== "gh") {
-        throw new error("Invalid passcode read the clue and try again");
+        throw new Error("Invalid passcode read the clue and try again");
       }
-      return true;
     }),
 ];
 async function handleHomePage(req, res) {
+  const sortBy = req.query.sortBy || "DESC";
   try {
-    const messages = await getFormattedMessages();
+    const messages = await getFormattedMessages(sortBy);
     res.render("home", {
       messages: messages,
       showAuthor: false,
       isAdmin: false,
+      sort: sortBy,
     });
   } catch (err) {
     console.log(err, "err,while rendering home page");
   }
 }
 async function handleIntroPage(req, res) {
+  const sortBy = req.query.sortBy || "DESC";
   try {
-    const messages = await getFormattedMessages();
+    const messages = await getFormattedMessages(sortBy);
     res.render("intro-page", {
       messages: messages,
       showAuthor: false,
       isAdmin: false,
+      sort: sortBy,
     });
   } catch (err) {
     console.log(err, "err,while rendering intro page");
@@ -100,39 +102,41 @@ async function handleIntroPage(req, res) {
 }
 async function handleMemberPage(req, res) {
   let msg;
-  if (!req.session.views) {
-    msg = `Hey, ${req.session.user.name} you are now officially a member of our club!`;
+  if (!req.session.views & !req.session.user.admin) {
+    msg = `Hey, ${req.session.user.name} you are now officially a member of our club!🎉`;
     req.session.views = "1";
   }
-
+  const sortBy = req.query.sortBy || "DESC";
   try {
-    const messages = await getAllMessages();
+    const messages = await getAllMessages(sortBy);
     res.render("member-page", {
       messages: messages,
       showAuthor: true,
       isAdmin: false,
       msg: msg,
+      sort: sortBy,
     });
   } catch (err) {
     console.log(err, "err,while rendering member page");
   }
 }
 async function handleAdminPage(req, res) {
+  const sortBy = req.query.sortBy || "DESC";
   try {
-    const messages = await getFormattedMessages();
+    const messages = await getFormattedMessages(sortBy);
 
     res.render("admin-page", {
       messages: messages,
       showAuthor: true,
       isAdmin: true,
+      sort: sortBy,
     });
   } catch (err) {
     console.log(err, "err,while rendering admin page");
   }
 }
 async function handleDeleteMsg(req, res) {
-  const { id } = req.params.id;
-
+  const { id } = req.params;
   try {
     await deleteMessage(id);
     res.status(200).json({ redirect: "/admin-page" });
@@ -157,7 +161,7 @@ async function handleCreateMsg(req, res) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(401).json({ errors: errors.array() });
   }
   const { userMessage } = req.body;
   const userId = req.session.user.id;
@@ -176,8 +180,7 @@ async function handleCreateMsg(req, res) {
         user: req.user,
       });
     }
-
-    //redirect using request path
+    //redirect to intro page
     return res.status(200).json({ redirect: "/" });
   } catch (err) {
     console.log(err, "err,while creating message");
@@ -187,9 +190,8 @@ async function handleLogIn(req, res, next) {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(401).json({ errors: errors.array() });
   }
-  console.log(req.session.user);
 
   authenticateUser(req, res, async () => {
     try {
@@ -222,9 +224,7 @@ async function handleJoinClub(req, res) {
   }
 
   try {
-    //show admin btn in frontend and  reveal authors
     await updateUserStatusById(req.user.id);
-
     return res.status(200).json({ redirect: "/member" });
   } catch (err) {
     console.log(err, "err,while joining club.");
@@ -245,28 +245,31 @@ async function handleUserToAdmin(req, res) {
     return res.status(402).json({ showAuthors: "false" });
   }
 }
-async function getFormattedMessages() {
+async function getFormattedMessages(sortBy) {
+  if (!sortBy) sortBy = "DESC";
   try {
-    const messages = await getAllMessages();
-
+    const messages = await getAllMessages(sortBy);
     const formattedMsg = formatMessagesTimeStamp(messages);
+    console.log(formattedMsg);
     return formattedMsg;
   } catch (err) {
     console.log(err, "err while formatting msg timestamp");
   }
 }
+
+// Function to adjust timestamp for messages
 function formatMessagesTimeStamp(messages) {
-  return messages.map((message) => ({
-    ...message,
-    timestamp: formatDistanceToNow(new Date(message.timestamp), {
-      addSuffix: true,
-    }), // Format timestamp
-  }));
+  return messages.map((message) => {
+    const formattedMessage = {
+      ...message,
+      timestamp: formatDistanceToNow(message.timestamp),
+    };
+    return formattedMessage;
+  });
 }
 async function handleUpdateMsgTimeStamp(req, res) {
   try {
     const messages = await getFormattedMessages();
-
     return res.status(200).json({ messages: messages });
   } catch (err) {
     console.log(err, "err while updating msg timestamp");
