@@ -1,4 +1,5 @@
 import newPool from "./pool.js";
+import { format } from "date-fns";
 
 async function getUsers() {
   try {
@@ -66,19 +67,15 @@ async function updateUserToAdminById(id) {
 */
 async function deleteUser(userId) {
   try {
-    const { rows } = await newPool.query("DELETE FROM users WHERE id=$1", [
-      userId,
-    ]);
-    return true;
+    await newPool.query("DELETE FROM users WHERE id=$1", [userId]);
+    return;
   } catch (err) {
     console.log(err, "err while removing user from db");
   }
 }
 async function deleteMessage(msgId) {
   try {
-    const { rows } = await newPool.query("DELETE FROM messages WHERE id=$1", [
-      msgId,
-    ]);
+    await newPool.query("DELETE FROM messages WHERE id=$1", [msgId]);
     return true;
   } catch (err) {
     console.log(err, "err while removing msg from db");
@@ -87,7 +84,8 @@ async function deleteMessage(msgId) {
 
 async function addMessages(userId, text) {
   //format time here
-  let createdTime = new Date().toISOString();
+  let createdTime = format(new Date(), "yyyy-MM-dd HH:mm:ss");
+
   try {
     const { rows } = await newPool.query(
       "INSERT INTO messages(user_id,text,timestamp) VALUES($1,$2,$3)",
@@ -98,22 +96,27 @@ async function addMessages(userId, text) {
     console.log(err, "err while adding  messages to db");
   }
 }
-async function getAllMessages() {
+//msg sort by newest first by default
+async function getAllMessages(sortType = "DESC") {
+  const sortBy = sortType === "DESC" ? "DESC" : "ASC";
+
   /*  message form adjusted  in this form:
   const messages = [
     { id: 1, author: "king", text: "Good Day", timeStamp: "date" },
   ];
   */
   try {
-    const { rows } = await newPool.query(
-      `SELECT 
+    const query = `
+      SELECT 
         messages.id, 
         users.name AS author, 
         messages.text, 
         messages.timestamp AS timeStamp 
       FROM messages 
-      INNER JOIN users ON users.id = messages.user_id`
-    );
+      INNER JOIN users ON users.id = messages.user_id 
+      ORDER BY messages.id ${sortBy}`;
+
+    const { rows } = await newPool.query(query);
 
     return rows;
   } catch (err) {
@@ -121,6 +124,7 @@ async function getAllMessages() {
     throw err;
   }
 }
+
 export {
   getUsers,
   getUserByName,
