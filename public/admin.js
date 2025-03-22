@@ -1,30 +1,8 @@
 import startRealTimeUpdate from "./updateMsgTime.js";
-const createMsgModal = document.querySelector("[data-name='create-msg-modal']");
+
 const msgForm = document.querySelector("[data-name='create-msg-form']");
-const msgBtn = document.querySelector("[data-name='create-msg-btn']");
-
-msgBtn.addEventListener("click", (e) => {
-  createMsgModal.show();
-});
-
-const msgHolder = document.querySelector("[data-name='msg-holder']");
-if (msgHolder) {
-  msgHolder.addEventListener("click", async function (e) {
-    if (e.target.matches("[data-name='del-msg-btn']")) {
-      const msgId = e.target.dataset.id;
-      try {
-        const endPoint = `/delete/message/${msgId}`;
-        const response = await fetch(endPoint, { method: "delete" });
-        const result = await response.json();
-        if (response.status === 200) {
-          window.location.href = result.redirect;
-        }
-      } catch (err) {
-        console.log(err, "err while deleting msg.");
-      }
-    }
-  });
-}
+const msgInput = msgForm.querySelector("textarea");
+const errMsgSpan = msgForm.querySelector(".err-msg");
 
 if (msgForm) {
   msgForm.addEventListener("submit", async function (e) {
@@ -45,10 +23,33 @@ if (msgForm) {
         window.location.href = result.redirect;
       } else if (response.status === 401) {
         //show errors
-        console.log(result);
+        const errMsg = result.errors[0].msg;
+        errMsgSpan.textContent = errMsg;
+        msgInput.addEventListener("input", () => {
+          errMsgSpan.textContent = "";
+        });
       }
     } catch (err) {
       console.log(err, "err while creating msg.");
+    }
+  });
+}
+//delete msg
+const msgHolder = document.querySelector(".msg-ul");
+if (msgHolder) {
+  msgHolder.addEventListener("click", async function (e) {
+    if (e.target.matches("[data-name='del-msg-btn']")) {
+      const msgId = e.target.dataset.id;
+      try {
+        const endPoint = `/delete/message/${msgId}`;
+        const response = await fetch(endPoint, { method: "delete" });
+        const result = await response.json();
+        if (response.status === 200) {
+          window.location.href = result.redirect;
+        }
+      } catch (err) {
+        console.log(err, "err while deleting msg.");
+      }
     }
   });
 }

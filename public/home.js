@@ -1,9 +1,8 @@
 import startRealTimeUpdate from "./updateMsgTime.js";
-//import { showFormErrMsg, hideErrMsg, clearErrMsg } from "./intro-page.js";
-const createMsgModal = document.querySelector("[data-name='create-msg-modal']");
-const msgForm = document.querySelector("[data-name='create-msg-form']");
-const msgBtn = document.querySelector(".msg-btn");
 
+const msgForm = document.querySelector("[data-name='create-msg-form']");
+const msgInput = msgForm.querySelector("textarea");
+const errMsgSpan = msgForm.querySelector(".err-msg");
 // join club form
 const joinClubModal = document.querySelector("[data-name='join-club-modal']");
 const joinClubForm = document.querySelector("[data-name='join-club-form']");
@@ -13,15 +12,13 @@ const errSpans = joinClubForm.querySelectorAll(".err-msg");
 //input
 const passcodeInput = joinClubForm.querySelector("input");
 
-const createMsgFormHolder = document.querySelector(
-  "[data-name='create-msg-form']"
-);
-const createMsgBtn = document.querySelector("[data-name='create-msg-btn']");
-msgBtn.addEventListener("click", (e) => {
-  createMsgModal.show();
-});
 joinClubBtn.addEventListener("click", (e) => {
   joinClubModal.showModal();
+});
+joinClubModal.addEventListener("click", (e) => {
+  if (e.target.matches("[data-name='close-btn']")) {
+    joinClubModal.close();
+  }
 });
 
 if (msgForm) {
@@ -40,10 +37,14 @@ if (msgForm) {
       const result = await response.json();
 
       if (response.status === 200) {
+        msgForm.reset();
         window.location.href = result.redirect;
-      } else if (response.status === 400) {
-        //show errors
-        console.log(result);
+      } else if (response.status === 401) {
+        const errMsg = result.errors[0].msg;
+        errMsgSpan.textContent = errMsg;
+        msgInput.addEventListener("input", () => {
+          errMsgSpan.textContent = "";
+        });
       }
     } catch (err) {
       console.log(err, "err while creating msg.");
@@ -65,14 +66,10 @@ if (joinClubForm) {
         body: formJson,
       });
       const result = await response.json();
-      console.log(result);
-
       if (response.status === 200) {
         joinClubForm.reset();
-        // createMsgBtn.style.display = "block";
-        // window.location.href = result.redirect;
         joinClubModal.close();
-        ///reveal the message author and show admin login btn
+        //reveal the message author
         window.location.href = result.redirect;
       } else if (response.status === 401) {
         //show errors

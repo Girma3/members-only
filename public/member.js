@@ -1,13 +1,15 @@
-
 import startRealTimeUpdate from "./updateMsgTime.js";
+
 const msgForm = document.querySelector("[data-name='create-msg-form']");
+const msgInput = msgForm.querySelector("textarea");
+const errMsgSpan = msgForm.querySelector(".err-msg");
 //
 const adminModal = document.querySelector("[data-name='admin-modal']");
 const adminForm = document.querySelector("[data-name='admin-form']");
 const adminBtn = document.querySelector("[data-name='admin-btn']");
 
-const passCodeInput = adminForm.querySelector("input")
-const errSpans = adminForm.querySelectorAll(".err-msg")
+const passCodeInput = adminForm.querySelector("input");
+const errSpans = adminForm.querySelectorAll(".err-msg");
 
 adminBtn.addEventListener("click", () => {
   adminModal.showModal();
@@ -34,10 +36,15 @@ if (msgForm) {
       const result = await response.json();
 
       if (response.status === 200) {
+        msgForm.reset();
         window.location.href = result.redirect;
-      } else if (response.status === 400) {
+      } else if (response.status === 401) {
         //show errors
-        console.log(result);
+        const errMsg = result.errors[0].msg;
+        errMsgSpan.textContent = errMsg;
+        msgInput.addEventListener("input", () => {
+          errMsgSpan.textContent = "";
+        });
       }
     } catch (err) {
       console.log(err, "err while creating msg.");
@@ -61,6 +68,7 @@ if (adminForm) {
       const result = await response.json();
 
       if (response.status === 200) {
+        adminForm.reset();
         window.location.href = result.redirect;
       } else if (response.status === 401) {
         //show errors
@@ -73,7 +81,7 @@ if (adminForm) {
         passCodeInput.addEventListener("input", () => {
           errSpans.forEach((span) => (span.textContent = ""));
         });
-        console.log(result);
+       
       }
     } catch (err) {
       console.log(err, "err while trying to be admin.");

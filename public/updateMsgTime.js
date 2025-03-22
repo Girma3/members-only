@@ -11,10 +11,19 @@ async function fetchMessages() {
 }
 // Function to update the DOM with user data
 function updateMsgTimeStamp(msgs) {
-  const allMsgTimeStamp = document.querySelectorAll(".msg-time");
+  if (!Array.isArray(msgs)) {
+    console.error("Invalid messages data:", msgs);
+    return;
+  }
+
+  const allMsgTimeStamp = document.querySelectorAll(
+    "[data-name='msg-timestamp']"
+  );
 
   msgs.forEach((msg, index) => {
-    if (allMsgTimeStamp[index]) {
+    if (allMsgTimeStamp[index] && msg.timestamp) {
+      allMsgTimeStamp[index].textContent = "";
+
       allMsgTimeStamp[index].textContent = msg.timestamp;
     }
   });
@@ -24,7 +33,9 @@ function updateMsgTimeStamp(msgs) {
 async function startRealTimeUpdate() {
   try {
     const msgs = await fetchMessages(); // Initial fetch when page loads
-    updateMsgTimeStamp(msgs.messages);
+    if (msgs) {
+      updateMsgTimeStamp(msgs.messages);
+    }
   } catch (error) {
     console.error("Failed to fetch users:", error);
   }
@@ -39,5 +50,4 @@ async function startRealTimeUpdate() {
     }
   }, 60000);
 }
-
 export default startRealTimeUpdate;
