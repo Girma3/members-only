@@ -3,11 +3,13 @@ import {
   updateUserStatusById,
   updateUserToAdminById,
   getAllMessages,
-  addMessages,
+  addMessage,
   deleteMessage,
+  addUser,
+  getUserById,
 } from "../db/queries.js";
 import authenticateUser from "../middleware/authController.js";
-import { format, formatDistanceToNow, parseISO } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 const validateUser = [
   body("userName")
     .trim()
@@ -26,7 +28,12 @@ const validateUser = [
     .notEmpty()
     .withMessage("confirm password can't be empty")
     .isLength({ min: 3 })
-    .withMessage("confirm password must be 3 or more characters"),
+    .withMessage("confirm password must be 3 or more characters")
+    .custom((value, { req }) => {
+      if (value !== req.body.userPassword) {
+        throw new Error("password doesn't match.");
+      }
+    }),
 ];
 const validateMsg = [
   body("userMessage").trim().notEmpty().withMessage("message can't be empty"),
@@ -42,34 +49,37 @@ const validateLogIn = [
     .trim()
     .notEmpty()
     .withMessage("password can't be empty")
-    .isLength({ min: 1 }) //adjust later
+    .isLength({ min: 2 }) //adjust later
     .withMessage("password must be at least 3  characters"),
 ];
+let joinPasscode = "Ethiopia".toLowerCase();
 const validateJoinClub = [
   body("userJoinClub")
     .trim()
     .notEmpty()
     .withMessage("passcode can't be empty.")
-    .isLength({ min: 2 })
-    .withMessage("pass code mut beat least 2 characters.") //adjust it
+    .isLength({ min: 8 })
+    .withMessage("passcode must be 8 characters.")
     .custom((value) => {
-      if (value !== "xy") {
+      if (value.toLowerCase() !== joinPasscode) {
         throw new Error("Invalid passcode read the clue and try again");
       }
+      return true;
     }),
 ];
-
+const adminPasscode = "Inception".toLowerCase();
 const validateAdmin = [
   body("adminPasscode")
     .trim()
     .notEmpty()
     .withMessage("passcode can't be empty.")
-    .isLength({ min: 2 })
-    .withMessage("pass code mut beat least 2 characters.") //adjust it
+    .isLength({ min: 9 })
+    .withMessage("pass code must be 9 characters.")
     .custom((value) => {
-      if (value !== "gh") {
+      if (value.toLowerCase() !== adminPasscode) {
         throw new Error("Invalid passcode read the clue and try again");
       }
+      return true;
     }),
 ];
 async function handleHomePage(req, res) {
@@ -139,7 +149,7 @@ async function handleDeleteMsg(req, res) {
   const { id } = req.params;
   try {
     await deleteMessage(id);
-    res.status(200).json({ redirect: "/admin-page" });
+    res.status(200).json({ redirect: "/admin-page" }); //only admin can delete msg
   } catch (err) {
     console.log(err, "err,while deleting msg ");
   }
@@ -149,9 +159,10 @@ async function handleSignIn(req, res) {
   if (!errors.isEmpty()) {
     return res.status(401).json({ errors: errors });
   }
+  const { userName, userPassword } = req.body;
   try {
     //add user to db
-
+    await addUser(userName, userPassword);
     return res.status(200).json({ redirect: "/home" });
   } catch (err) {
     console.log(err, "err,while sign in");
@@ -168,7 +179,7 @@ async function handleCreateMsg(req, res) {
 
   try {
     //add msg to db
-    await addMessages(userId, userMessage);
+    await addMessage(userId, userMessage);
     if (req.session.user.admin === true) {
       return res.status(200).json({
         redirect: "/admin-page",
@@ -180,6 +191,7 @@ async function handleCreateMsg(req, res) {
         user: req.user,
       });
     }
+
     //redirect to intro page
     return res.status(200).json({ redirect: "/" });
   } catch (err) {
@@ -188,11 +200,9 @@ async function handleCreateMsg(req, res) {
 }
 async function handleLogIn(req, res, next) {
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     return res.status(401).json({ errors: errors.array() });
   }
-
   authenticateUser(req, res, async () => {
     try {
       if (req.session.user.admin === true) {
@@ -207,7 +217,7 @@ async function handleLogIn(req, res, next) {
         });
       }
       return res.status(200).json({
-        redirect: "/",
+        redirect: "/home",
         user: req.user,
       });
     } catch (err) {
@@ -224,11 +234,20 @@ async function handleJoinClub(req, res) {
   }
 
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
     await updateUserStatusById(req.user.id);
+    // fetch the updated user data and assign it to req.user
+    const updatedUser = await getUserById(req.user.id);
+    req.user = updatedUser;
+    req.session.user = req.user;
+
     return res.status(200).json({ redirect: "/member" });
   } catch (err) {
     console.log(err, "err,while joining club.");
-    return res.status(401).json({ showAuthors: "false" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 }
 async function handleUserToAdmin(req, res) {
@@ -239,6 +258,10 @@ async function handleUserToAdmin(req, res) {
 
   try {
     await updateUserToAdminById(req.user.id);
+    // fetch the updated user data and assign it to req.user
+    const updatedUser = await getUserById(req.user.id);
+    req.user = updatedUser;
+    req.session.user = req.user;
     return res.status(200).json({ redirect: "/admin-page" });
   } catch (err) {
     console.log(err, "err,while user to be an admin.");
@@ -250,7 +273,6 @@ async function getFormattedMessages(sortBy) {
   try {
     const messages = await getAllMessages(sortBy);
     const formattedMsg = formatMessagesTimeStamp(messages);
-    console.log(formattedMsg);
     return formattedMsg;
   } catch (err) {
     console.log(err, "err while formatting msg timestamp");
@@ -262,14 +284,15 @@ function formatMessagesTimeStamp(messages) {
   return messages.map((message) => {
     const formattedMessage = {
       ...message,
-      timestamp: formatDistanceToNow(message.timestamp),
+      timestamp: formatDistanceToNow(message.timestamp, { addSuffix: true }),
     };
     return formattedMessage;
   });
 }
 async function handleUpdateMsgTimeStamp(req, res) {
+  const sortBy = req.query.sortBy || "DESC";
   try {
-    const messages = await getFormattedMessages();
+    const messages = await getFormattedMessages(sortBy);
     return res.status(200).json({ messages: messages });
   } catch (err) {
     console.log(err, "err while updating msg timestamp");
