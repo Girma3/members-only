@@ -1,0 +1,42 @@
+<form
+  action="/log-in"
+  method="post"
+  data-name="log-in-form"
+  class="flex-column form log-in-form"
+>
+  
+  <label for="logInUserName">Name</label>
+  <input
+    type="text"
+    id="logInUserName"
+    name="logInUserName"
+    autocomplete="on"
+  />
+  <div class="flex-column err-msg-holder">
+    <span class="err-msg" data-field="logInUserName"></span>
+    <span class="err-msg" data-field="logInUserName"></span>
+  </div>
+  <label for="logInUserPassword">password</label>
+  <input
+    type="password"
+    id="logInUserPassword"
+    name="logInUserPassword"
+    data-name="log-in-password"
+    autocomplete="on"
+  />
+  <div class="flex-column err-msg-holder">
+    <span class="err-msg" data-field="logInUserPassword"></span>
+    <span class="err-msg" data-field="logInUserPassword"></span>
+  </div>
+  <label for="showLogInPassword">show Password</label>
+  <input
+    type="checkbox"
+    name="showLogInPassword"
+    id="showLogInPassword"
+    data-name="log-in-checkbox"
+    class="checkBox-pwd"
+  />
+  <button type="submit" class="log-in-btn">
+    <span class="btn-text">Log In</span>
+  </button>
+</form>

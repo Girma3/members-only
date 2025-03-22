@@ -1,0 +1,23 @@
+<li class="flex-row msg-holder" data-name="msg-holder">
+  <div class="flex-column author-holder">
+    <% if(showAuthor === true) { %>
+    <p class="msg-author show-author"><%=message.author%></p>
+    <% } else { %>
+    <p class="msg-author hide-author">Anonymous</p>
+
+    <% } %>
+
+    <p class="msg-text"><%=message.text%></p>
+  </div>
+  <div class="flex-row del-btn-holder">
+    <p data-name="msg-timestamp"><%=message.timestamp%></p>
+    <%if(isAdmin){%>
+    <button
+      class="del-msg-btn"
+      data-name="del-msg-btn"
+      data-id="<%=message.id%>"
+      aria-label="delete-message"
+    ></button>
+  </div>
+  <%}%>
+</li>

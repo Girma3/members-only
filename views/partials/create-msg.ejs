@@ -1,0 +1,21 @@
+<form
+  action="/create/message"
+  method="post"
+  class="flex-column form"
+  data-name="create-msg-form"
+  autocomplete="on"
+>
+  <label for="userMessage" aria-label="message"></label>
+  <textarea
+    name="userMessage"
+    id="userMessage"
+    class="msg-input"
+    autocomplete="on"
+    required
+    placeholder="Type your message here"
+  ></textarea>
+  <div>
+    <span class="err-msg"></span>
+  </div>
+  <button type="submit" class="post-btn">Post</button>
+</form>

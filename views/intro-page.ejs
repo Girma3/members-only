@@ -2,40 +2,39 @@
 <html lang="en">
   <%- include("./partials/header") %>
   <body>
-    <header class="flex-row">
-      <h1>Home</h1>
-      <button class="join-club-btn" data-name="join-club-btn">Join Club</button>
-      <a href="/log-out" class="log-out-link">Log Out</a>
-    </header>
+    <%- include("./partials/intro-page-nav") %>
     <main>
       <div class="flex-row sort-holder">
         <p>Sort messages By:</p>
-        <a href="/home?sortBy=DESC" class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"> Newest</a>
+        <a href="/?sortBy=DESC" class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"> Newest</a>
         <span>/</span>
         <a
-          href="/home?sortBy=ASC"
+          href="/?sortBy=ASC"
           class="sort-link <%= sort === 'ASC' ? 'active' : '' %>"
         >
           Oldest</a
         >
       </div>
-      <section class="msg-holder create-msg-holder">
-        <%- include("./partials/create-msg") %>
+      <section class="sign-in-form-holder" data-name="sign-in-form-holder">
+        <dialog data-name="sign-in-modal" class="sign-in-modal">
+          <button class="close-btn" data-name="close-btn">X</button>
+          <%- include("./partials/sign-in-form") %>
+        </dialog>
       </section>
-
+      <section>
+        <dialog data-name="log-in-modal" class="log-in-dialog">
+          <button class="close-btn" data-name="close-btn">X</button>
+          <div class="flex-row hexagon-holder">
+            <%- include("./partials/log-in-form") %>
+          </div>
+        </dialog>
+      </section>
       <section>
         <ul class="msg-ul">
           <% if(messages.length > 0) { %> <% messages.forEach((message) => { %>
           <%- include("./partials/message", {message:
           message,showAuthor:showAuthor,isAdmin:isAdmin}) %> <% }) %> <% } %>
         </ul>
-      </section>
-
-      <section class="join-form-holder" data-name="join-in-form-holder">
-        <dialog data-name="join-club-modal">
-          <button class="close-btn" data-name="close-btn">X</button>
-          <%- include("./partials/join-member-form") %>
-        </dialog>
       </section>
     </main>
 
@@ -49,6 +48,6 @@
         }
       });
     </script>
-    <script type="module" src="/home.js"></script>
+    <script type="module" src="/intro-page.js"></script>
   </body>
 </html>

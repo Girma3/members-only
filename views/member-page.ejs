@@ -3,38 +3,46 @@
   <%- include("./partials/header") %>
   <body>
     <header class="flex-row">
-      <h1>Home</h1>
-      <button class="join-club-btn" data-name="join-club-btn">Join Club</button>
-      <a href="/log-out" class="log-out-link">Log Out</a>
+      <h1>members club</h1>
+      <nav>
+        <button class="admin-btn" data-name="admin-btn">Admin Log In</button>
+        <a href="/log-out" class="log-out-link">Log Out</a>
+      </nav>
     </header>
     <main>
       <div class="flex-row sort-holder">
         <p>Sort messages By:</p>
-        <a href="/home?sortBy=DESC" class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"> Newest</a>
+        <a
+          href="/member-page?sortBy=DESC"
+          class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"
+        >
+          Newest</a
+        >
         <span>/</span>
         <a
-          href="/home?sortBy=ASC"
+          href="/member-page?sortBy=ASC"
           class="sort-link <%= sort === 'ASC' ? 'active' : '' %>"
         >
           Oldest</a
         >
       </div>
+      <p><%=msg%></p>
+
       <section class="msg-holder create-msg-holder">
         <%- include("./partials/create-msg") %>
       </section>
-
       <section>
         <ul class="msg-ul">
           <% if(messages.length > 0) { %> <% messages.forEach((message) => { %>
           <%- include("./partials/message", {message:
-          message,showAuthor:showAuthor,isAdmin:isAdmin}) %> <% }) %> <% } %>
+          message,showAuthor:showAuthor}) %> <% }) %> <% } %>
         </ul>
       </section>
 
-      <section class="join-form-holder" data-name="join-in-form-holder">
-        <dialog data-name="join-club-modal">
+      <section class="admin-form-holder" data-name="admin-form-holder">
+        <dialog data-name="admin-modal">
           <button class="close-btn" data-name="close-btn">X</button>
-          <%- include("./partials/join-member-form") %>
+          <%- include("./partials/admin-form") %>
         </dialog>
       </section>
     </main>
@@ -49,6 +57,6 @@
         }
       });
     </script>
-    <script type="module" src="/home.js"></script>
+    <script type="module" src="/member.js"></script>
   </body>
 </html>

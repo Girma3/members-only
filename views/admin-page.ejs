@@ -3,24 +3,29 @@
   <%- include("./partials/header") %>
   <body>
     <header class="flex-row">
-      <h1>Home</h1>
-      <button class="join-club-btn" data-name="join-club-btn">Join Club</button>
+      <h1>Admin page</h1>
       <a href="/log-out" class="log-out-link">Log Out</a>
     </header>
     <main>
-      <div class="flex-row sort-holder">
+      <section class="msg-holder create-msg-holder">
+        <%- include("./partials/create-msg") %>
+      </section>
+
+      <section class="flex-row sort-holder">
         <p>Sort messages By:</p>
-        <a href="/home?sortBy=DESC" class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"> Newest</a>
+        <a
+          href="/admin-page?sortBy=DESC"
+          class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"
+        >
+          Newest</a
+        >
         <span>/</span>
         <a
-          href="/home?sortBy=ASC"
+          href="/admin-page?sortBy=ASC"
           class="sort-link <%= sort === 'ASC' ? 'active' : '' %>"
         >
           Oldest</a
         >
-      </div>
-      <section class="msg-holder create-msg-holder">
-        <%- include("./partials/create-msg") %>
       </section>
 
       <section>
@@ -29,13 +34,6 @@
           <%- include("./partials/message", {message:
           message,showAuthor:showAuthor,isAdmin:isAdmin}) %> <% }) %> <% } %>
         </ul>
-      </section>
-
-      <section class="join-form-holder" data-name="join-in-form-holder">
-        <dialog data-name="join-club-modal">
-          <button class="close-btn" data-name="close-btn">X</button>
-          <%- include("./partials/join-member-form") %>
-        </dialog>
       </section>
     </main>
 
@@ -49,6 +47,6 @@
         }
       });
     </script>
-    <script type="module" src="/home.js"></script>
+    <script type="module" src="/admin.js"></script>
   </body>
 </html>
