@@ -4,11 +4,20 @@
   letter-spacing: 1.5px;
 }
 body {
+  max-width: 1300px;
   background-color: black;
   color: white;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
-button {
+.log-out-link {
+  text-decoration: none;
+}
+header {
+  padding: 1rem;
+  box-shadow: -1px -2px 5px 3px rgb(11, 255, 3);
+}
+button,
+.log-out-link {
   border: none;
   outline: none;
   cursor: pointer;
@@ -19,6 +28,26 @@ button {
   background-color: yellow;
   color: black;
 }
+dialog {
+  width: 300px;
+  height: fit-content;
+  padding: 0.2rem;
+  border: 2px solid rgb(63, 247, 2);
+  border-radius: 2px;
+  top: 10%;
+  left: 10%;
+  background-color: black;
+}
+p,
+.create-msg-holder {
+  text-align: center;
+  margin: auto;
+}
+dialog::backdrop {
+  background-color: rgb(27, 25, 58) transparent;
+  backdrop-filter: blur(5px);
+}
+
 .flex-row {
   display: flex;
   justify-content: space-between;
@@ -36,14 +65,10 @@ button {
 
 .msg-holder {
   position: relative;
-  /* width: 80%;
-   */
   width: fit-content;
   max-width: 600px;
   height: fit-content;
   justify-content: center;
-
-  text-align: end;
   border-radius: 5px;
   background-color: white;
   color: black;
@@ -78,13 +103,18 @@ button {
 .msg-author {
   position: relative;
   font-size: 1rem;
+  border-radius: 2px;
   padding-inline: 0.5rem;
   font-weight: 700;
-  background-color: yellow;
+  color: yellow;
+  background-color: rgb(0, 0, 0);
   text-align: center;
 }
 .msg-text {
   word-wrap: break-word;
+  max-width: 400px;
+  text-align: center;
+  padding-block: 0.3rem;
 }
 .hide-author::after {
   content: "";
@@ -95,7 +125,6 @@ button {
   left: 0;
   background-color: black;
 }
-
 .show-author .hide-author::after {
   display: none;
 }
@@ -117,7 +146,6 @@ button {
   display: none;
   background-color: transparent;
   background-image: url("/assets/delete.png");
-  /* background-image: url("/assets/trash-can.png"); */
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -188,23 +216,9 @@ button {
   padding: 1rem;
 }
 
-dialog {
-  width: 300px;
-  height: fit-content;
-  padding: 0.2rem;
-  border: 2px solid rgb(63, 247, 2);
-  border-radius: 2px;
-  top: 10%;
-  left: 10%;
-}
-dialog::backdrop {
-  background-color: rgb(27, 25, 58) transparent;
-  backdrop-filter: blur(5px);
-}
 dialog > .form {
-  padding-block: 0.3rem;
+  padding-block: 1rem;
 }
-
 .form {
   gap: 0.3rem;
   max-height: 450px;
@@ -212,6 +226,13 @@ dialog > .form {
 .form > input {
   padding: 0.3rem;
   border: 1px solid rgb(2, 20, 123);
+  outline: 1px solid rgb(2, 20, 123);
+  border-radius: 0.3rem;
+}
+.form > input:focus {
+  padding: 0.3rem;
+  border: 1px solid rgb(123, 2, 107);
+  outline: 2px solid rgb(221, 3, 255);
   border-radius: 0.3rem;
 }
 
@@ -226,7 +247,6 @@ dialog > .form {
 }
 /* sign in form */
 .sign-in-modal {
-  left: 10%;
   background-color: black;
 }
 .input-holder > input {
@@ -283,13 +303,36 @@ dialog > .form {
   background-color: yellow;
   color: black;
 }
+/* msg sort style */
+.sort-holder {
+  justify-content: end;
+  width: fit-content;
+  max-width: 100%;
+  position: relative;
+  padding: 1rem;
+}
+.sort-link {
+  text-decoration: none;
+  color: white;
+  padding: 0.5rem;
+}
+.active {
+  color: yellow;
+  text-decoration: underline;
+}
+.sort-holder > span {
+  color: rgb(68, 255, 0);
+}
 
-@media (min-width: 500px) {
+@media (min-width: 800px) {
   .msg-holder {
     width: 60%;
     justify-content: space-between;
   }
   dialog {
     left: 30%;
+  }
+  .sort-holder {
+    right: -55%;
   }
 }
