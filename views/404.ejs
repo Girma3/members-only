@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include("./partials/header")%>
+  <body>
+    <main>
+      <% if (msg) { %>
+      <h1 style="text-align: center"><%= msg %></h1>
+      <% } else { %>
+      <h1 style="text-align: center">page not Found</h1>
+
+      <% } %><a href="/">Home</a>
+    </main>
+  </body>
+</html>
