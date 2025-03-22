@@ -1,5 +1,6 @@
 import newPool from "./pool.js";
 import { format } from "date-fns";
+import { hashPassword } from "../middleware/authenticateMiddleware.js";
 
 async function getUsers() {
   try {
@@ -32,10 +33,11 @@ async function getUserById(id) {
     throw err;
   }
 }
+
 async function updateUserStatusById(id) {
   try {
     const { rows } = await newPool.query(
-      "UPDATE users SET member = true WHERE id = $1",
+      "UPDATE users SET member = true WHERE id = $1 RETURNING *",
       [id]
     );
     return rows[0];
@@ -56,15 +58,19 @@ async function updateUserToAdminById(id) {
     throw err;
   }
 }
-/*async function getAllMessages() {
+
+async function addUser(name, password) {
   try {
-    const { rows } = await newPool.query("SELECT * FROM messages");
-    return rows;
+    const userPassword = await hashPassword(password);
+    await newPool.query("INSERT INTO users (name,password)", [
+      name,
+      userPassword,
+    ]);
   } catch (err) {
-    console.log(err, "err while getting all messages from db");
+    console.log(err, "err while adding user to db");
   }
 }
-*/
+
 async function deleteUser(userId) {
   try {
     await newPool.query("DELETE FROM users WHERE id=$1", [userId]);
@@ -73,19 +79,10 @@ async function deleteUser(userId) {
     console.log(err, "err while removing user from db");
   }
 }
-async function deleteMessage(msgId) {
-  try {
-    await newPool.query("DELETE FROM messages WHERE id=$1", [msgId]);
-    return true;
-  } catch (err) {
-    console.log(err, "err while removing msg from db");
-  }
-}
-
-async function addMessages(userId, text) {
+// message db
+async function addMessage(userId, text) {
   //format time here
   let createdTime = format(new Date(), "yyyy-MM-dd HH:mm:ss");
-
   try {
     const { rows } = await newPool.query(
       "INSERT INTO messages(user_id,text,timestamp) VALUES($1,$2,$3)",
@@ -94,6 +91,14 @@ async function addMessages(userId, text) {
     return rows;
   } catch (err) {
     console.log(err, "err while adding  messages to db");
+  }
+}
+async function deleteMessage(msgId) {
+  try {
+    await newPool.query("DELETE FROM messages WHERE id=$1", [msgId]);
+    return true;
+  } catch (err) {
+    console.log(err, "err while removing msg from db");
   }
 }
 //msg sort by newest first by default
@@ -133,6 +138,7 @@ export {
   updateUserToAdminById,
   deleteUser,
   getAllMessages,
-  addMessages,
+  addMessage,
   deleteMessage,
+  addUser,
 };
