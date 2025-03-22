@@ -3,7 +3,7 @@ function handleLogOut(req, res, next) {
     if (err) {
       next(err);
     }
-    return res.status(200).json({ redirect: "/" });
+    next();
   });
 }
 export { handleLogOut };
