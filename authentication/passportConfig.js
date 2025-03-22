@@ -6,7 +6,6 @@ import { getUserByName, getUserById } from "../db/queries.js";
 const verifyUser = async (userName, userPassword, done) => {
   try {
     const user = await getUserByName(userName);
-   // console.log(user);
 
     if (!user) {
       return done(null, false, { message: "Incorrect username." });
