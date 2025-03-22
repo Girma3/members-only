@@ -1,63 +1,64 @@
 import express from "express";
-import passport from "../authentication/auth.js";
+
 import {
   handleHomePage,
+  handleIntroPage,
   validateUser,
   handleSignIn,
   validateMsg,
   handleCreateMsg,
   validateLogIn,
   handleLogIn,
+  validateJoinClub,
+  handleJoinClub,
+  handleMemberPage,
+  handleAdminPage,
+  handleUserToAdmin,
+  validateAdmin,
+  handleDeleteMsg,
+  handleUpdateMsgTimeStamp,
 } from "../controllers/control.js";
-import { ResultWithContextImpl } from "express-validator/lib/chain/context-runner-impl.js";
+//import authenticateUser from "../middleware/authController.js";
+import { handleLogOut } from "../authentication/authController.js";
+import {
+  ensureAuthenticated,
+  isUserAdmin,
+  isUserMember,
+} from "../middleware/authenticateMiddleware.js";
 
 const membersRoute = express.Router();
 
-membersRoute.get("/", handleHomePage);
+membersRoute.get("/", handleIntroPage);
 membersRoute.post("/sign", validateUser, handleSignIn);
-membersRoute.post("/create/message", validateMsg, handleCreateMsg);
-
-membersRoute.get("/detail", (req, res) => {
-  res.render("detail");
-});
-membersRoute.get("/guide", (req, res) => {
-  res.render("guide");
-});
+membersRoute.post(
+  "/create/message",
+  isUserMember,
+  validateMsg,
+  handleCreateMsg
+);
 
 membersRoute.post("/log-in", validateLogIn, handleLogIn);
 
-membersRoute.post("/log-in", validateLogIn, (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      console.log(err, "error during authentication");
-      return next(err);
-    }
-    if (!user) {
-      return res.status(402).json({ message: "authentication failed" });
-    }
-    req.login(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      try {
-        handleLogIn(req, res, next);
-      } catch (err) {
-        console.log(err);
-        return next(err);
-      }
-      return res
-        .status(200)
-        .json({ message: "authentication successfully!", redirect: "/" });
-    });
-  })(req, res, next);
-});
+membersRoute.get("/home", ensureAuthenticated, handleHomePage);
+membersRoute.get("/member", isUserMember, handleMemberPage);
+membersRoute.post(
+  "/join-club",
+  ensureAuthenticated,
+  validateJoinClub,
+  handleJoinClub
+);
+//
+membersRoute.post("/admin", isUserMember, validateAdmin, handleUserToAdmin);
+membersRoute.get("/admin-page", isUserAdmin, handleAdminPage);
 
-membersRoute.get("/log-out", (req, res, next) => {
-  req.logOut((err) => {
-    if (err) {
-      next(err);
-    }
-    return res.status(200).json({ redirect: "/" });
-  });
+membersRoute.delete("/delete/message/:id", isUserAdmin, handleDeleteMsg);
+
+membersRoute.get("/api/messages", handleUpdateMsgTimeStamp);
+
+membersRoute.get("/log-out", handleLogOut, handleIntroPage);
+membersRoute.get("*", (req, res) => {
+  res.render("404", { msg: "page not found " });
 });
-export { membersRoute };
+//
+
+export default membersRoute;
