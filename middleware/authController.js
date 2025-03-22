@@ -16,7 +16,7 @@ function authenticateUser(req, res, next) {
         console.error("Error during login:", err);
         return res.status(401).json({ message: "User not authenticated" });
       }
-      // return res.status(200).json({ redirect: "/detail", user });
+      req.session.user = user;
       next();
     });
   })(req, res, next);
