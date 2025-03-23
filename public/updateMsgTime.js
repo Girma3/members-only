@@ -1,6 +1,13 @@
 // Function to fetch users data from the server
 async function fetchMessages() {
-  const endPoint = "/api/messages";
+  //get the page sort type (desc or acs from span) as to know current state  of sort type
+  const sortSpan = document.querySelector("[data-name='sort-span']");
+  if (!sortSpan) {
+    console.error("Sort span element not found to get sort type");
+    return;
+  }
+  const sortType = sortSpan.dataset.sort;
+  const endPoint = `/api/messages/?sortBy=${sortType}`;
   try {
     const response = await fetch(endPoint, { method: "get" });
     const result = await response.json();
@@ -23,7 +30,6 @@ function updateMsgTimeStamp(msgs) {
   msgs.forEach((msg, index) => {
     if (allMsgTimeStamp[index] && msg.timestamp) {
       allMsgTimeStamp[index].textContent = "";
-
       allMsgTimeStamp[index].textContent = msg.timestamp;
     }
   });
