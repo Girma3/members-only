@@ -3,6 +3,7 @@ dotenv.config();
 import pkg from "pg";
 import bcrypt from "bcryptjs";
 const { Client } = pkg;
+const dbUrl = process.argv[2] || process.env.DATABASE_URL;
 
 async function hashPassword(password) {
   try {
@@ -16,13 +17,14 @@ async function hashPassword(password) {
 
 async function main() {
   const client = new Client({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: dbUrl,
+    ssl: dbUrl.includes("render.com")
+      ? { rejectUnauthorized: false }
+      : undefined,
   });
 
   try {
     await client.connect();
-
-    const demoPassword = await hashPassword("12");
 
     const createUserTableSQL = `
       CREATE TABLE IF NOT EXISTS users (
@@ -49,11 +51,34 @@ async function main() {
     const insertMsgSql = `
       INSERT INTO messages (text,user_id) VALUES ($1,$2);
     `;
+    const createSessionTable = `
+CREATE TABLE IF NOT EXISTS "session" (
+  "sid" varchar NOT NULL COLLATE "default",
+  "session_data" json NOT NULL,
+  "expire" timestamp(6) NOT NULL,
+  PRIMARY KEY ("sid")
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_indexes
+    WHERE schemaname = 'public' AND indexname = 'IDX_session_expire'
+  ) THEN
+    CREATE INDEX "IDX_session_expire" ON "session" ("expire");
+  END IF;
+END $$;`;
 
     await client.query(createUserTableSQL);
-    await client.query(insertUserSQL, ["king", demoPassword]);
     await client.query(createMessagesTableSQL);
-    await client.query(insertMsgSql, ["Happy coding EveryOne 💪.", 1]);
+    await client.query(createSessionTable);
+
+    await client.query(insertUserSQL, ["king", await hashPassword("1234")]);
+    await client.query(insertMsgSql, ["Happy coding EveryOne 💪🏿.", 1]);
+
+    await client.query(insertUserSQL, ["queen", await hashPassword("5678")]);
+    await client.query(insertMsgSql, ["Keep learning and improving! 🚀", 2]);
   } catch (err) {
     console.error("Error while populating db:", err);
   } finally {
