@@ -32,13 +32,12 @@ membersRoute.get("/", handleIntroPage);
 membersRoute.post("/sign", validateUser, handleSignIn);
 membersRoute.post(
   "/create/message",
-  isUserMember,
+  ensureAuthenticated,
   validateMsg,
   handleCreateMsg
 );
 
 membersRoute.post("/log-in", validateLogIn, handleLogIn);
-
 membersRoute.get("/home", ensureAuthenticated, handleHomePage);
 membersRoute.get("/member", isUserMember, handleMemberPage);
 membersRoute.post(
@@ -50,12 +49,13 @@ membersRoute.post(
 //
 membersRoute.post("/admin", isUserMember, validateAdmin, handleUserToAdmin);
 membersRoute.get("/admin-page", isUserAdmin, handleAdminPage);
-
 membersRoute.delete("/delete/message/:id", isUserAdmin, handleDeleteMsg);
 
+//send messages as json to update time stamp periodically
 membersRoute.get("/api/messages", handleUpdateMsgTimeStamp);
 
 membersRoute.get("/log-out", handleLogOut, handleIntroPage);
+
 membersRoute.get("*", (req, res) => {
   res.render("404", { msg: "page not found " });
 });
