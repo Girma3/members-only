@@ -170,7 +170,6 @@ async function handleSignIn(req, res) {
 }
 async function handleCreateMsg(req, res) {
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     return res.status(401).json({ errors: errors.array() });
   }
@@ -192,8 +191,8 @@ async function handleCreateMsg(req, res) {
       });
     }
 
-    //redirect to intro page
-    return res.status(200).json({ redirect: "/" });
+    //redirect to home page
+    return res.status(200).json({ redirect: "/home" });
   } catch (err) {
     console.log(err, "err,while creating message");
   }
