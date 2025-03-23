@@ -12,6 +12,7 @@
         <p>Sort messages By:</p>
         <a href="/home?sortBy=DESC" class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"> Newest</a>
         <span>/</span>
+        <span data-name="sort-span" data-sort="<%=sort%>"></span>
         <a
           href="/home?sortBy=ASC"
           class="sort-link <%= sort === 'ASC' ? 'active' : '' %>"

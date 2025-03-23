@@ -6,8 +6,14 @@
     <main>
       <div class="flex-row sort-holder">
         <p>Sort messages By:</p>
-        <a href="/?sortBy=DESC" class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"> Newest</a>
+        <a
+          href="/?sortBy=DESC"
+          class="sort-link <%= sort === 'DESC' ? 'active' : '' %>"
+        >
+          Newest</a
+        >
         <span>/</span>
+        <span data-name="sort-span" data-sort="<%=sort%>"></span>
         <a
           href="/?sortBy=ASC"
           class="sort-link <%= sort === 'ASC' ? 'active' : '' %>"
