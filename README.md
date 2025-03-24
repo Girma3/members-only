@@ -30,9 +30,11 @@ This is a solution to the [Members-Only] (https://www.theodinproject.com/lessons
 
 ### Screenshot
 
-![desktop-homepage](public/assets/screenshot/desktop-homepage.png)
-![login-form](public/assets/screenshot/log-in-form.png)
-![mobile-page](public/assets/screenshot/mobile-page.png)
+```markdown
+![Desktop Homepage](./public/assets/screenshot/desktop-homepage.png)
+![Login Form](./public/assets/screenshot/log-in-form.png)
+![Mobile Page](./public/assets/screenshot/mobile-page.png)
+```
 
 ### Links
 
