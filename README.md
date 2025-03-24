@@ -30,9 +30,9 @@ This is a solution to the [Members-Only] (https://www.theodinproject.com/lessons
 
 ### Screenshot
 
-![Desktop Homepage](../members-only/public/assets/screenshot/desktop-homepage.png)
+![Desktop Homepage](./public/assets/screenshot/desktop-homepage.png)
 ![Login Form](./public/assets/screenshot/log-in-form.png)
-![Mobile Page](/public/assets/screenshot/mobile-page.png)
+![Mobile Page](./public/assets/screenshot/mobile-page.png)
 
 ### Links
 
