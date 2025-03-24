@@ -7,9 +7,11 @@ const connectionString = process.argv[2] || process.env.DATABASE_URL;
 
 const newPool = new Pool({
   connectionString: connectionString,
-  ssl: connectionString.includes("render.com")
-    ? { rejectUnauthorized: false }
-    : undefined,
+  ssl:
+    typeof connectionString === "string" &&
+    connectionString.includes("render.com")
+      ? { rejectUnauthorized: false }
+      : undefined,
 });
 
 export default newPool;
