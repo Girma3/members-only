@@ -52,23 +52,17 @@ async function main() {
       INSERT INTO messages (text,user_id) VALUES ($1,$2);
     `;
     const createSessionTable = `
-CREATE TABLE IF NOT EXISTS "session" (
+    CREATE TABLE IF NOT EXISTS "session" (
   "sid" varchar NOT NULL COLLATE "default",
-  "session_data" json NOT NULL,
+  "sess" json NOT NULL,
   "expire" timestamp(6) NOT NULL,
   PRIMARY KEY ("sid")
-);
+)
+WITH (OIDS=FALSE);
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1
-    FROM pg_indexes
-    WHERE schemaname = 'public' AND indexname = 'IDX_session_expire'
-  ) THEN
-    CREATE INDEX "IDX_session_expire" ON "session" ("expire");
-  END IF;
-END $$;`;
+CREATE INDEX "IDX_session_expire" ON "session" ("expire");
+
+    `;
 
     await client.query(createUserTableSQL);
     await client.query(createMessagesTableSQL);
